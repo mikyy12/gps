@@ -1,0 +1,28 @@
+name: Documentation Quality
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: documentation-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Validate docs-code contracts
+        run: node scripts/validate-doc-sync.mjs
+      - name: Measure documentation health
+        run: node scripts/docs-health.mjs
+      - name: Validate changelog
+        run: node scripts/validate-changelog.mjs
